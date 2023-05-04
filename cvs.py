@@ -1,9 +1,17 @@
 import sys
+import os
 
 class CVS:
     def __init__(self):
         def init(*args):
-            print(5, 6, 7)
+            if len(args) == 1:
+                cwd = args[0]
+            elif len(args) == 0:
+                cwd = os.getcwd()
+            else:
+                raise ValueError
+            path = os.path.join(cwd, '.cvs')
+            os.mkdir(path)
 
 
         def add(*args):
@@ -38,7 +46,3 @@ try:
 except ValueError:
     cmd, *args = input().split()
     cvs.commands[cmd](*args)
-
-
-
-
