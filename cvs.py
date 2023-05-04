@@ -12,7 +12,10 @@ class CVS:
                 raise ValueError
             path = os.path.join(cwd, '.cvs')
             os.mkdir(path)
-
+            file_path = os.path.join(path, 'index')
+            with open(file_path, 'w'):
+                pass
+            
 
         def add(*args):
             pass
