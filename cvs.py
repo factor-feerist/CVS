@@ -45,7 +45,6 @@ class CVS:
 cvs = CVS()
 try:
     cmd, *args = sys.argv[1:]
-    cvs.commands[cmd](*args)
 except ValueError:
     cmd, *args = input().split()
-    cvs.commands[cmd](*args)
+cvs.commands[cmd](*args)
