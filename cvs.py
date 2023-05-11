@@ -3,13 +3,11 @@ import os
 
 class CVS:
     def __init__(self):
-        def init(*args):
-            if len(args) == 1:
-                cwd = args[0]
-            elif len(args) == 0:
-                cwd = os.getcwd()
+        def init(path = None):
+            if path is not None:
+                cwd = path
             else:
-                raise ValueError
+                cwd = os.getcwd()
             path = os.path.join(cwd, '.cvs')
             os.mkdir(path)
             file_path = os.path.join(path, 'index')
