@@ -38,11 +38,3 @@ class CVS:
                     'reset': reset,
                     'log': log
                     }
-   
-
-cvs = CVS()
-try:
-    cmd, *args = sys.argv[1:]
-except ValueError:
-    cmd, *args = input().split()
-cvs.commands[cmd](*args)
