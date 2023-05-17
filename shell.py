@@ -9,17 +9,19 @@ class CVSShell(cmd.Cmd):
     def __init__(self):
         super().__init__()
         self._current_directory = os.getcwd()
+        self.cvs = None
         CVSShell.prompt = f'{self._current_directory}>'
 
     def do_cd(self, directory):
         '''Changes current directory'''
         try:
             if ':' in directory:
+                os.chdir(directory)
                 self._current_directory = directory
             else:
+                os.chdir(os.path.join(self._current_directory, directory))
                 self._current_directory = os.path.join(self._current_directory, directory)
             CVSShell.prompt = f'{self._current_directory}>'
-            os.chdir(self._current_directory)
         except OSError:
             print(f'*** Can\'t find directory \"{directory}\"')
 
@@ -50,6 +52,33 @@ class CVSShell(cmd.Cmd):
             print(f'*** Directory {self._current_directory} is already a repository')
         else:
             self.cvs = CVS(self._current_directory)
+            self.cvs.init()
+
+    def do_add(self, arg):
+        if self.cvs == None:
+            if CVS.is_initialized(self._current_directory):
+                self.cvs = CVS(self._current_directory)
+            else:
+                print('*** No repository in this directory')
+                return
+        if arg == '.':
+            for path in os.listdir('.'):
+                self.do_add(os.path.join(self._current_directory, path))
+        else:
+            for item in arg.split():
+                if ':' in item:
+                    path = item
+                else:
+                    path = f'{self._current_directory}\\{item}'
+                if os.path.isdir(path):
+                    if path == f'{self._current_directory}\\.cvs':
+                        return
+                    for e in os.listdir(path):
+                        self.do_add(os.path.join(path, e))
+                elif os.path.isfile(path):
+                    self.cvs.add_file(path)
+                else:
+                    print(f'*** No such directory or file: {path}')
 
     def precmd(self, line):
         print()
