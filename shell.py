@@ -47,7 +47,7 @@ class CVSShell(cmd.Cmd):
             print(f'    {item}')
 
     def do_init(self, arg):
-        '''Initialize repository in current directory'''
+        '''Initializes repository in current directory'''
         if CVS.is_initialized(self._current_directory):
             print(f'*** Directory {self._current_directory} is already a repository')
         else:
@@ -55,6 +55,7 @@ class CVSShell(cmd.Cmd):
             self.cvs.init()
 
     def do_add(self, arg):
+        '''Adds mentioned files in current directory to stage'''
         if self.cvs == None:
             if CVS.is_initialized(self._current_directory):
                 self.cvs = CVS(self._current_directory)
