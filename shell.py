@@ -44,6 +44,10 @@ class CVSShell(cmd.Cmd):
         for item in os.listdir(self._current_directory):
             print(item)
 
+    def do_init(self, arg):
+        '''Initialize repository in current directory'''
+        self.cvs = CVS(self._current_directory)
+
     def precmd(self, line):
         print()
         return line

@@ -2,39 +2,9 @@ import sys
 import os
 
 class CVS:
-    def __init__(self):
-        def init(path = None):
-            if path is not None:
-                cwd = path
-            else:
-                cwd = os.getcwd()
-            path = os.path.join(cwd, '.cvs')
-            os.mkdir(path)
-            file_path = os.path.join(path, 'index')
-            with open(file_path, 'w'):
-                pass
-            
-
-        def add(*args):
+    def __init__(self, directory):
+        self.directory = directory
+        os.mkdir(f'{directory}\\.cvs')
+        os.mkdir(f'{directory}\\.cvs\\objects')
+        with open(f'{directory}\\.cvs\\index', 'w'):
             pass
-
-
-        def commit(*args):
-            pass
-
-
-        def reset(*args):
-            pass
-
-
-        def log(*args):
-            pass
-
-        self.commands = {
-                    'init': init,
-                    'add': add,
-                    'commit': commit,
-                    'ci': commit,
-                    'reset': reset,
-                    'log': log
-                    }
