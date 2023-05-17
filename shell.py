@@ -21,20 +21,20 @@ class CVSShell(cmd.Cmd):
             CVSShell.prompt = f'{self._current_directory}>'
             os.chdir(self._current_directory)
         except OSError:
-            print(f'Can\'t find directory \"{directory}\"')
+            print(f'*** Can\'t find directory \"{directory}\"')
 
     def do_mkdir(self, directory):
         '''Creates a new directory'''
         try:
             os.mkdir(os.path.join(self._current_directory, directory))
         except FileExistsError:
-            print(f'Directory {directory} already exists')
+            print(f'*** Directory {directory} already exists')
 
     def do_touch(self, filename):
         '''Creates a new file'''
         try:
             with open(filename) as f:
-                print(f'File {filename} already exists')
+                print(f'*** File {filename} already exists')
         except OSError:
             with open(filename, 'w') as f:
                 pass
@@ -42,11 +42,14 @@ class CVSShell(cmd.Cmd):
     def do_ls(self, arg):
         '''Shows all files in current directory'''
         for item in os.listdir(self._current_directory):
-            print(item)
+            print(f'    {item}')
 
     def do_init(self, arg):
         '''Initialize repository in current directory'''
-        self.cvs = CVS(self._current_directory)
+        if CVS.is_initialized(self._current_directory):
+            print(f'*** Directory {self._current_directory} is already a repository')
+        else:
+            self.cvs = CVS(self._current_directory)
 
     def precmd(self, line):
         print()
