@@ -54,3 +54,10 @@ class CVS:
             for key, value in d.items():
                 f.write(f'{key}\\\\{value}\n')
         
+    def log(self):
+        with open(f'{self.directory}\\.cvs\\log') as f:
+            content = f.read()
+        print(content)
+
+    def commit(self, message):
+        pass

@@ -81,6 +81,16 @@ class CVSShell(cmd.Cmd):
                 else:
                     print(f'*** No such directory or file: {path}')
 
+    def do_log(self, arg):
+        '''Prints stage log'''
+        if self.cvs == None:
+            if CVS.is_initialized(self._current_directory):
+                self.cvs = CVS(self._current_directory)
+            else:
+                print('*** No repository in this directory')
+                return
+        self.cvs.log()
+
     def precmd(self, line):
         print()
         return line
