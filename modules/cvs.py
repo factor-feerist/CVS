@@ -1,7 +1,8 @@
 import sys
 import os
 from datetime import datetime
-from modules.utilities import get_hash, Blob
+from modules.utilities import get_hash, read_index
+from modules.objects import Blob, Tree
 
 
 class CVS:
@@ -21,25 +22,9 @@ class CVS:
         return os.path.isdir(f'{directory}/.cvs')
 
     def add_file(self, path):
-        with open(path) as f:
-            content = f.read()
-        h = get_hash(content)
-        blob_path = f'{self.directory}\\.cvs\\objects\\{h[:2]}'
-        if not os.path.exists(blob_path):
-            os.mkdir(blob_path)
-        with open(f'{blob_path}\\{h[2:]}', 'wb') as f:
-            f.write(Blob(content).serialize())
-
-        if os.path.exists(f'{self.directory}\\.cvs\\index'):
-            with open(f'{self.directory}\\.cvs\\index') as f:
-                index = f.read()
-        else:
-            index = ''
-        d = {}
-        for line in index.split('\n'):
-            ops = line.split('\\\\')
-            if len(ops) == 2:
-                d[ops[0]] = ops[1]
+        blob = Blob(self.directory, path)
+        h = blob.hash
+        d = read_index(self.directory)
         
         if path in d.keys() and not h == d[path]:
             with open(f'{self.directory}\\.cvs\\log', 'a') as f:
@@ -61,3 +46,4 @@ class CVS:
 
     def commit(self, message):
         pass
+    
