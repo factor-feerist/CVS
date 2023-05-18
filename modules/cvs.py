@@ -22,8 +22,10 @@ class CVS:
         return os.path.isdir(f'{directory}/.cvs')
 
     def add_file(self, path):
-        blob = Blob(self.directory, path)
-        h = blob.hash
+        with open(path) as f:
+            content = f.read()
+        h = Blob(self.directory, content).hash
+        
         d = read_index(self.directory)
         
         if path in d.keys() and not h == d[path]:

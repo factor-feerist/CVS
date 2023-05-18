@@ -3,10 +3,8 @@ import os
 from modules.utilities import get_hash, read_index
 
 class Blob():
-    def __init__(self, repository, path):
-        with open(path) as f:
-            self.content = f.read()
-        self.hash = get_hash(self.content)
+    def __init__(self, repository, content):
+        self.hash = get_hash(content)
         blob_path = f'{repository}\\.cvs\\objects\\{self.hash[:2]}'
         if not os.path.exists(blob_path):
             os.mkdir(blob_path)
@@ -42,7 +40,7 @@ class Tree():
                 content = ''
                 for line in subtree:
                     content += f'{line}\n'
-                h = get_hash(content)
+                h = Blob(self.directory, content).hash
                 tree.append(f'tree {h} {item}')
         
         return tree

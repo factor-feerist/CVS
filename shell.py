@@ -56,12 +56,8 @@ class CVSShell(cmd.Cmd):
 
     def do_add(self, arg):
         '''Adds mentioned files in current directory to stage'''
-        if self.cvs == None:
-            if CVS.is_initialized(self._current_directory):
-                self.cvs = CVS(self._current_directory)
-            else:
-                print('*** No repository in this directory')
-                return
+        if not self.is_repository():
+            return
         if arg == '.':
             for path in os.listdir('.'):
                 self.do_add(os.path.join(self._current_directory, path))
@@ -83,17 +79,29 @@ class CVSShell(cmd.Cmd):
 
     def do_log(self, arg):
         '''Prints stage log'''
+        if not self.is_repository():
+            return
+        self.cvs.log()
+
+    def do_commit(self, message):
+        '''Makes a commit with mentioned message'''
+        if not self.is_repository():
+            return
+        pass
+
+    def precmd(self, line):
+        print()
+        return line
+
+    def is_repository(self):
         if self.cvs == None:
             if CVS.is_initialized(self._current_directory):
                 self.cvs = CVS(self._current_directory)
             else:
                 print('*** No repository in this directory')
-                return
-        self.cvs.log()
+                return False
+        return True
 
-    def precmd(self, line):
-        print()
-        return line
 
 if __name__ == '__main__':
     CVSShell().cmdloop()
