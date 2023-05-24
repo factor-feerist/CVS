@@ -14,9 +14,9 @@ class CVS:
     def init(self):
         os.mkdir(f'{self.directory}\\.cvs')
         os.mkdir(f'{self.directory}\\.cvs\\objects')
-        os.mkdir(self._path + '\\.cvs\\refs')
-        os.mkdir(self._path + '\\.cvs\\refs\\heads')
-        with open(self._path + '\\.cvs\\HEAD', 'w') as f:
+        os.mkdir(f'{self.directory}\\.cvs\\refs')
+        os.mkdir(f'{self.directory}\\.cvs\\refs\\heads')
+        with open(f'{self.directory}\\.cvs\\HEAD', 'w') as f:
             f.write('ref:refs/heads/master')
         with open(f'{self.directory}\\.cvs\\index', 'w'):
             pass
@@ -63,7 +63,7 @@ class CVS:
         else:
             parent = self.branch_handler.get_commit_by_branch(branch)
         commit = f'tree {tree.hash}\nparent {parent}\n\n{message}'
-        h = Blob(commit).hash
+        h = Blob(self.directory, commit).hash
 
         with open(f'{self.directory}\\.cvs\\commitlog') as f:
             clog = f.read()
@@ -72,19 +72,20 @@ class CVS:
             if parent is not None:
                 prev_log = clog[clog.index(parent)::]
             for item in removed:
-                f.write(f'  - {item} removed')
-            d = read_index()
+                f.write(f'  - {item} removed\n')
+            d = read_index(self.directory)
             for item in d.keys():
                 if parent is None:
-                    f.write(f'  - {item} added')
+                    f.write(f'  - {item} added {d[item]}\n')
                 elif d[item] not in prev_log:
                     if item in prev_log:
-                        f.write(f'  - {item} changed')
+                        f.write(f'  - {item} changed {d[item]}\n')
                     else:
-                        f.write(f'  - {item} added')
+                        f.write(f'  - {item} added {d[item]}\n')
         if branch is None:
             self.branch_handler.set_head_to_commit(h)
         self.branch_handler.set_commit_by_branch(branch, h)
+        return h
 
     def commit_log(self):
         with open(f'{self.directory}\\.cvs\\commitlog') as f:
@@ -97,11 +98,17 @@ class CVS:
             commit = self.branch_handler.get_head_commit()
         else:
             commit = self.branch_handler.get_commit_by_branch(branch)
-        with open(path) as f:
+        if commit is None:
+            raise Exception('No commits in repository')
+        with open(path, 'w') as f:
             f.write(commit)
 
     def remove_branch(self, name):
         if self.branch_handler.get_head_branch() == name:
             commit = self.branch_handler.get_commit_by_branch(name)
             self.branch_handler.set_head_to_commit(commit)
-        os.remove(f'{self.directory}\\.cvs\\refs\\heads\\{name}')
+        path = f'{self.directory}\\.cvs\\refs\\heads\\{name}'
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            raise Exception(f'No branch named {name}')

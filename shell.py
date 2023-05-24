@@ -54,6 +54,7 @@ class CVSShell(cmd.Cmd):
         else:
             self.cvs = CVS(self._current_directory)
             self.cvs.init()
+            print('Repository initialized')
 
     def do_add(self, arg):
         '''Adds mentioned files in current directory to stage'''
@@ -75,6 +76,7 @@ class CVSShell(cmd.Cmd):
                         self.do_add(os.path.join(path, e))
                 elif os.path.isfile(path):
                     self.cvs.add_file(path)
+                    print(f'Added to stage {item}')
                 else:
                     print(f'*** No such directory or file: {path}')
 
@@ -88,7 +90,7 @@ class CVSShell(cmd.Cmd):
         '''Makes a commit with mentioned message'''
         if not self.is_repository():
             return
-        self.cvs.commit(message)
+        h = self.cvs.commit(message)
         print(f'*** Changes were commited succesfully: commit {h}')
 
     def do_clog(self, arg):
@@ -104,18 +106,24 @@ class CVSShell(cmd.Cmd):
         ops = arg.split()
         name = ops[0]
         if len(ops) == 2 and ops[1] == 'r':
-            self.cvs.remove_branch(name)
-            print(f'*** Removed branch {name}')
+            try:
+                self.cvs.remove_branch(name)
+                print(f'*** Removed branch {name}')
+            except Exception as e:
+                print(e)
         elif len(ops) == 1:
-            self.cvs.create_branch(name)
-            print(f'*** Created branch {name}')
+            try:
+                self.cvs.create_branch(name)
+                print(f'*** Created branch {name}')
+            except Exception as e:
+                print(e)
         
     def precmd(self, line):
         print()
         return line
 
     def is_repository(self):
-        if self.cvs == None:
+        if self.cvs is None:
             if CVS.is_initialized(self._current_directory):
                 self.cvs = CVS(self._current_directory)
             else:
