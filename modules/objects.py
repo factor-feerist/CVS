@@ -2,6 +2,7 @@ import pickle
 import os
 from modules.utilities import get_hash, read_index
 
+
 class Blob():
     def __init__(self, repository, content):
         self.hash = get_hash(content)
@@ -21,6 +22,10 @@ class Tree():
         self.index = read_index(directory)
         self.not_processed = self.index.keys()
         self.tree = self.build_subtree(directory)
+        self.content = ''
+        for line in tree:
+            self.content += f'{line}\n'
+        self.hash = Blob(self.directory, self.content).hash
         
 
     def build_subtree(self, path):

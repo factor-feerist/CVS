@@ -3,6 +3,7 @@ import os
 import sys
 from modules.cvs import CVS
 
+
 class CVSShell(cmd.Cmd):
     intro = 'Welcome to the CVS shell'
     prompt = None
@@ -77,18 +78,38 @@ class CVSShell(cmd.Cmd):
                 else:
                     print(f'*** No such directory or file: {path}')
 
-    def do_log(self, arg):
+    def do_slog(self, arg):
         '''Prints stage log'''
         if not self.is_repository():
             return
-        self.cvs.log()
+        print(self.cvs.stage_log())
 
     def do_commit(self, message):
         '''Makes a commit with mentioned message'''
         if not self.is_repository():
             return
-        pass
+        self.cvs.commit(message)
+        print(f'*** Changes were commited succesfully: commit {h}')
 
+    def do_clog(self, arg):
+        '''Prints commit log'''
+        if not self.is_repository():
+            return
+        print(self.cvs.commit_log())
+
+    def do_branch(self, arg):
+        '''Creates branch with mentioned name: branch name\nRemoves branch with mentioned name: branch name r'''
+        if not self.is_repository():
+            return
+        ops = arg.split()
+        name = ops[0]
+        if len(ops) == 2 and ops[1] == 'r':
+            self.cvs.remove_branch(name)
+            print(f'*** Removed branch {name}')
+        elif len(ops) == 1:
+            self.cvs.create_branch(name)
+            print(f'*** Created branch {name}')
+        
     def precmd(self, line):
         print()
         return line
