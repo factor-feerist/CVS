@@ -5,6 +5,7 @@ import hashlib
 def get_hash(content):
     return hashlib.sha1(content.encode("utf-8")).hexdigest()
 
+
 def read_index(directory):
     if os.path.exists(f'{directory}\\.cvs\\index'):
         with open(f'{directory}\\.cvs\\index') as f:

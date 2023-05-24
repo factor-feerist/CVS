@@ -3,7 +3,7 @@ import os
 from modules.utilities import get_hash, read_index
 
 
-class Blob():
+class Blob:
     def __init__(self, repository, content):
         self.hash = get_hash(content)
         blob_path = f'{repository}\\.cvs\\objects\\{self.hash[:2]}'
@@ -16,7 +16,7 @@ class Blob():
         return pickle.dumps(self)
         
 
-class Tree():
+class Tree:
     def __init__(self, directory):
         self.index = read_index(directory)
         self.not_processed = set(self.index.keys())
@@ -25,7 +25,6 @@ class Tree():
         for line in self.tree:
             self.content += f'{line}\n'
         self.hash = Blob(directory, self.content).hash
-        
 
     def build_subtree(self, path):
         tree = []

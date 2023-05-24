@@ -1,7 +1,6 @@
-import sys
 import os
 from datetime import datetime
-from modules.utilities import get_hash, read_index
+from modules.utilities import read_index
 from modules.objects import Blob, Tree
 from modules.branch_handler import BranchHandler
 
@@ -24,7 +23,6 @@ class CVS:
             pass
         with open(f'{self.directory}\\.cvs\\commitlog', 'w'):
             pass
-        
 
     @staticmethod
     def is_initialized(directory):
@@ -39,12 +37,14 @@ class CVS:
         
         if path in d.keys() and h != d[path]:
             with open(f'{self.directory}\\.cvs\\stagelog', 'a') as f:
-                f.write(f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}\\\\CHANGED\\\\{path}\\\\{d[path]}\\\\{h}\n')
+                f.write(f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}'
+                        f'\\\\CHANGED\\\\{path}\\\\{d[path]}\\\\{h}\n')
                 d[path] = h
         elif path not in d.keys():
             d[path] = h
             with open(f'{self.directory}\\.cvs\\stagelog', 'a') as f:
-                f.write(f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}\\\\ADDED\\\\{path}\\\\{d[path]}\n')
+                f.write(f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}'
+                        f'\\\\ADDED\\\\{path}\\\\{d[path]}\n')
 
         with open(f'{self.directory}\\.cvs\\index', 'w') as f:
             for key, value in d.items():
@@ -68,7 +68,9 @@ class CVS:
         with open(f'{self.directory}\\.cvs\\commitlog') as f:
             clog = f.read()
         with open(f'{self.directory}\\.cvs\\commitlog', 'a') as f:
-            f.write(f'Commit\\\\{h}\\\\{datetime.now().strftime("%d/%m/%y %H:%M:%S")}\\\\{message}\n')
+            f.write(f'Commit\\\\{h}\\\\'
+                    f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}'
+                    f'\\\\{message}\n')
             if parent is not None:
                 prev_log = clog[clog.index(parent)::]
             d = read_index(self.directory)

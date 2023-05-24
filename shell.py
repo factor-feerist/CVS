@@ -1,12 +1,12 @@
 import cmd
 import os
-import sys
 from modules.cvs import CVS
 
 
 class CVSShell(cmd.Cmd):
     intro = 'Welcome to the CVS shell'
     prompt = None
+
     def __init__(self):
         super().__init__()
         self._current_directory = os.getcwd()
@@ -14,50 +14,53 @@ class CVSShell(cmd.Cmd):
         CVSShell.prompt = f'{self._current_directory}>'
 
     def do_cd(self, directory):
-        '''Changes current directory'''
+        """Changes current directory\ncd directory"""
         try:
             if ':' in directory:
                 os.chdir(directory)
                 self._current_directory = directory
             else:
                 os.chdir(os.path.join(self._current_directory, directory))
-                self._current_directory = os.path.join(self._current_directory, directory)
+                self._current_directory = os.path.join(self._current_directory,
+                                                       directory)
             CVSShell.prompt = f'{self._current_directory}>'
         except OSError:
             print(f'*** Can\'t find directory \"{directory}\"')
 
     def do_mkdir(self, directory):
-        '''Creates a new directory'''
+        """Creates a new directory\nmkdir directory"""
         try:
             os.mkdir(os.path.join(self._current_directory, directory))
         except FileExistsError:
             print(f'*** Directory {directory} already exists')
 
     def do_touch(self, filename):
-        '''Creates a new file'''
+        """Creates a new file\ntouch file"""
         try:
-            with open(filename) as f:
+            with open(filename):
                 print(f'*** File {filename} already exists')
         except OSError:
-            with open(filename, 'w') as f:
+            with open(filename, 'w'):
                 pass
 
     def do_ls(self, arg):
-        '''Shows all files in current directory'''
+        """Shows all files in current directory\nls"""
         for item in os.listdir(self._current_directory):
             print(f'    {item}')
 
     def do_init(self, arg):
-        '''Initializes repository in current directory'''
+        """Initializes repository in current directory\ninit"""
         if CVS.is_initialized(self._current_directory):
-            print(f'*** Directory {self._current_directory} is already a repository')
+            print(f'*** Directory {self._current_directory} is already a '
+                  f'repository')
         else:
             self.cvs = CVS(self._current_directory)
             self.cvs.init()
             print('Repository initialized')
 
     def do_add(self, arg):
-        '''Adds mentioned files in current directory to stage'''
+        """Adds mentioned files in current directory to stage: add file ...
+        dir ...\nAdds all files in current directory to stage: add ."""
         if not self.is_repository():
             return
         if arg == '.':
@@ -81,26 +84,27 @@ class CVSShell(cmd.Cmd):
                     print(f'*** No such directory or file: {path}')
 
     def do_slog(self, arg):
-        '''Prints stage log'''
+        """Prints stage log\nslog"""
         if not self.is_repository():
             return
         print(self.cvs.stage_log())
 
     def do_commit(self, message):
-        '''Makes a commit with mentioned message'''
+        """Makes a commit with mentioned message\n commit message"""
         if not self.is_repository():
             return
         h = self.cvs.commit(message)
-        print(f'*** Changes were commited succesfully: commit {h}')
+        print(f'*** Changes were committed successfully: commit {h}')
 
     def do_clog(self, arg):
-        '''Prints commit log'''
+        """Prints commit log\nclog"""
         if not self.is_repository():
             return
         print(self.cvs.commit_log())
 
     def do_branch(self, arg):
-        '''Creates branch with mentioned name: branch name\nRemoves branch with mentioned name: branch name r'''
+        """Creates branch with mentioned name: branch name\nRemoves branch
+        with mentioned name: branch name r"""
         if not self.is_repository():
             return
         ops = arg.split()
