@@ -14,7 +14,7 @@ class CVSShell(cmd.Cmd):
         CVSShell.prompt = f'{self._current_directory}>'
 
     def do_cd(self, directory):
-        """Changes current directory\ncd directory"""
+        'Changes current directory\n> cd directory'
         try:
             if ':' in directory:
                 os.chdir(directory)
@@ -28,14 +28,14 @@ class CVSShell(cmd.Cmd):
             print(f'*** Can\'t find directory \"{directory}\"')
 
     def do_mkdir(self, directory):
-        """Creates a new directory\nmkdir directory"""
+        'Creates a new directory\n> mkdir directory'
         try:
             os.mkdir(os.path.join(self._current_directory, directory))
         except FileExistsError:
             print(f'*** Directory {directory} already exists')
 
     def do_touch(self, filename):
-        """Creates a new file\ntouch file"""
+        'Creates a new file\n> touch file'
         try:
             with open(filename):
                 print(f'*** File {filename} already exists')
@@ -44,12 +44,12 @@ class CVSShell(cmd.Cmd):
                 pass
 
     def do_ls(self, arg):
-        """Shows all files in current directory\nls"""
+        'Shows all files in current directory\n> ls'
         for item in os.listdir(self._current_directory):
             print(f'    {item}')
 
     def do_init(self, arg):
-        """Initializes repository in current directory\ninit"""
+        'Initializes repository in current directory\n> init'
         if CVS.is_initialized(self._current_directory):
             print(f'*** Directory {self._current_directory} is already a '
                   f'repository')
@@ -59,8 +59,10 @@ class CVSShell(cmd.Cmd):
             print('Repository initialized')
 
     def do_add(self, arg):
-        """Adds mentioned files in current directory to stage: add file ...
-        dir ...\nAdds all files in current directory to stage: add ."""
+        'Adds mentioned files or directories in current directory to stage:' \
+        '\n> add file1 file2 ... dir1 dir2 ...' \
+        '\nAdds all files in current directory to stage:' \
+        '\n> add .'
         if not self.is_repository():
             return
         if arg == '.':
@@ -84,27 +86,29 @@ class CVSShell(cmd.Cmd):
                     print(f'*** No such directory or file: {path}')
 
     def do_slog(self, arg):
-        """Prints stage log\nslog"""
+        'Prints stage log\n> slog'
         if not self.is_repository():
             return
         print(self.cvs.stage_log())
 
     def do_commit(self, message):
-        """Makes a commit with mentioned message\n commit message"""
+        'Makes a commit with mentioned message\n> commit message'
         if not self.is_repository():
             return
         h = self.cvs.commit(message)
         print(f'*** Changes were committed successfully: commit {h}')
 
     def do_clog(self, arg):
-        """Prints commit log\nclog"""
+        'Prints commit log\n> clog'
         if not self.is_repository():
             return
         print(self.cvs.commit_log())
 
     def do_branch(self, arg):
-        """Creates branch with mentioned name: branch name\nRemoves branch
-        with mentioned name: branch name r"""
+        'Creates branch with mentioned name:' \
+        '\n> branch name' \
+        '\nRemoves branch with mentioned name:' \
+        '\n> branch name r'
         if not self.is_repository():
             return
         ops = arg.split()
