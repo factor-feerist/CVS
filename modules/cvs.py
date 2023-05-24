@@ -71,17 +71,35 @@ class CVS:
             f.write(f'Commit\\\\{h}\\\\{datetime.now().strftime("%d/%m/%y %H:%M:%S")}\\\\{message}\n')
             if parent is not None:
                 prev_log = clog[clog.index(parent)::]
-            for item in removed:
-                f.write(f'  - {item} removed\n')
             d = read_index(self.directory)
+            removed_log = []
+            added_log = []
+            changed_log = []
+            not_changed_log = []
             for item in d.keys():
-                if parent is None:
-                    f.write(f'  - {item} added {d[item]}\n')
+                if item in removed:
+                    removed_log.append(f'  - {item} removed\n')
+                elif parent is None:
+                    added_log.append(f'  - {item} added {d[item]}\n')
                 elif d[item] not in prev_log:
                     if item in prev_log:
-                        f.write(f'  - {item} changed {d[item]}\n')
+                        changed_log.append(f'  - {item} changed {d[item]}\n')
                     else:
-                        f.write(f'  - {item} added {d[item]}\n')
+                        added_log.append(f'  - {item} added {d[item]}\n')
+                else:
+                    not_changed_log.append(f'  - {item} {d[item]}\n')
+            for record in removed_log:
+                f.write(record)
+            for record in added_log:
+                f.write(record)
+            for record in changed_log:
+                f.write(record)
+            for record in not_changed_log:
+                f.write(record)
+        with open(f'{self.directory}\\.cvs\\index', 'w') as f:
+            for key, value in d.items():
+                if key not in removed:
+                    f.write(f'{key}\\\\{value}\n')
         if branch is None:
             self.branch_handler.set_head_to_commit(h)
         self.branch_handler.set_commit_by_branch(branch, h)
