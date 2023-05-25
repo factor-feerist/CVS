@@ -1,6 +1,6 @@
 import os
 import hashlib
-       
+
 
 def get_hash(content):
     return hashlib.sha1(content.encode("utf-8")).hexdigest()

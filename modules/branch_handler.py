@@ -18,7 +18,7 @@ class BranchHandler:
         if head_type != 'ref':
             return h
         return None
-        
+
     def get_commit_by_branch(self, branch):
         path = f'{self.directory}\\.cvs\\refs\\heads\\{branch}'
         if os.path.exists(path):

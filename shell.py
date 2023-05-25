@@ -60,9 +60,9 @@ class CVSShell(cmd.Cmd):
 
     def do_add(self, arg):
         'Adds mentioned files or directories in current directory to stage:' \
-        '\n> add file1 file2 ... dir1 dir2 ...' \
-        '\nAdds all files in current directory to stage:' \
-        '\n> add .'
+            '\n> add file1 file2 ... dir1 dir2 ...' \
+            '\nAdds all files in current directory to stage:' \
+            '\n> add .'
         if not self.is_repository():
             return
         if arg == '.':
@@ -106,9 +106,9 @@ class CVSShell(cmd.Cmd):
 
     def do_branch(self, arg):
         'Creates branch with mentioned name:' \
-        '\n> branch name' \
-        '\nRemoves branch with mentioned name:' \
-        '\n> branch name r'
+            '\n> branch name' \
+            '\nRemoves branch with mentioned name:' \
+            '\n> branch name r'
         if not self.is_repository():
             return
         ops = arg.split()

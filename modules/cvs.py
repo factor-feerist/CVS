@@ -9,7 +9,7 @@ class CVS:
     def __init__(self, directory):
         self.directory = directory
         self.branch_handler = BranchHandler(directory)
-        
+
     def init(self):
         os.mkdir(f'{self.directory}\\.cvs')
         os.mkdir(f'{self.directory}\\.cvs\\objects')
@@ -32,9 +32,9 @@ class CVS:
         with open(path) as f:
             content = f.read()
         h = Blob(self.directory, content).hash
-        
+
         d = read_index(self.directory)
-        
+
         if path in d.keys() and h != d[path]:
             with open(f'{self.directory}\\.cvs\\stagelog', 'a') as f:
                 f.write(f'{datetime.now().strftime("%d/%m/%y %H:%M:%S")}'
@@ -49,7 +49,7 @@ class CVS:
         with open(f'{self.directory}\\.cvs\\index', 'w') as f:
             for key, value in d.items():
                 f.write(f'{key}\\\\{value}\n')
-        
+
     def stage_log(self):
         with open(f'{self.directory}\\.cvs\\stagelog') as f:
             return f.read()

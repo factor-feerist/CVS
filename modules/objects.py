@@ -14,7 +14,7 @@ class Blob:
 
     def serialize(self):
         return pickle.dumps(self)
-        
+
 
 class Tree:
     def __init__(self, directory):
