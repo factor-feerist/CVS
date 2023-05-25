@@ -3,13 +3,13 @@ import unittest
 import os
 import shutil
 import re
-
+sys.path.append('../')
 from shell import CVSShell
 
 shell = CVSShell()
 
 
-class Test_CVS(unittest.TestCase):
+class TestCVS(unittest.TestCase):
     def SetUp(self):
         pass
 
@@ -48,7 +48,8 @@ class Test_CVS(unittest.TestCase):
             f.write("2dir")
         shell.do_cd(directory)
         shell.do_add('dir')
-        with open(os.path.join(os.path.join(directory, 'dir'), 'adir.txt'), 'w') as f:
+        with open(os.path.join(os.path.join(directory, 'dir'),
+                               'adir.txt'), 'w') as f:
             f.write('test1')
         shell.do_add('dir a.txt')
         with open(os.path.join(directory, 'a.txt'), 'w') as f:
@@ -64,37 +65,65 @@ class Test_CVS(unittest.TestCase):
             for line in f.read().split('\n')[:-1]:
                 result_log.append(str(line.split('\\\\')[-1]))
         unittest.TestCase.assertEqual(self, result_index,
-                                      ['b444ac06613fc8d63795be9ad0beaf55011936ac',
-                                       '5839faba624c7c7b58c71033446dfc7a55f63bbf',
-                                       '109f4b3c50d7b0df729d299bc6f8e9ef9066971f',
-                                       'da4b9237bacccdf19c0760cab7aec4a8359010b0'])
+                                      ['b444ac06613fc8d63795'
+                                       'be9ad0beaf55011936ac',
+                                       '5839faba624c7c7b58c7'
+                                       '1033446dfc7a55f63bbf',
+                                       '109f4b3c50d7b0df729d'
+                                       '299bc6f8e9ef9066971f',
+                                       'da4b9237bacccdf19c07'
+                                       '60cab7aec4a8359010b0'])
         unittest.TestCase.assertEqual(self, result_log,
-                                      ['9334405ce86ccd5a82ebdf09ed7c2047a654599c',
-                                       '5839faba624c7c7b58c71033446dfc7a55f63bbf',
-                                       'b444ac06613fc8d63795be9ad0beaf55011936ac',
-                                       '356a192b7913b04c54574d18c28d46e6395428ab',
-                                       '109f4b3c50d7b0df729d299bc6f8e9ef9066971f',
-                                       'da4b9237bacccdf19c0760cab7aec4a8359010b0'])
+                                      ['9334405ce86ccd5a82eb'
+                                       'df09ed7c2047a654599c',
+                                       '5839faba624c7c7b58c7'
+                                       '1033446dfc7a55f63bbf',
+                                       'b444ac06613fc8d63795'
+                                       'be9ad0beaf55011936ac',
+                                       '356a192b7913b04c5457'
+                                       '4d18c28d46e6395428ab',
+                                       '109f4b3c50d7b0df729d'
+                                       '299bc6f8e9ef9066971f',
+                                       'da4b9237bacccdf19c07'
+                                       '60cab7aec4a8359010b0'])
         shutil.rmtree(f'{directory}\\.cvs')
         shutil.rmtree(f'{directory}\\dir')
         os.remove(f'{directory}\\a.txt')
         os.remove(f'{directory}\\b.txt')
 
-
-"""
     def test_commit(self):
-        directory = os.getcwd()
+        directory = os.path.join(os.getcwd(), 'test')
         shell.do_cd('test')
         shell.do_init('')
-        shell.do_touch(f'{directory}\\test\\a.txt')
-        shell.do_touch(f'{directory}\\test\\b.txt')
+        shell.do_touch(f'{directory}\\a.txt')
+        shell.do_touch(f'{directory}\\b.txt')
         with open(f'{directory}\\a.txt', 'w') as f:
             f.write('test1')
         with open(f'{directory}\\b.txt', 'w') as f:
             f.write('test2')
         shell.do_add('.')
         shell.do_commit('sdv')
-"""
+        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
+        with open(f'{directory}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac') as f:
+            self.assertEqual(f.readline(),
+            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(b444ac06613fc8d63795be9ad0beaf55011936ac”sb.')
+        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\93\\bc5fa433afe94a7b10dd955df6e80c91b25961'))
+        with open(f'{directory}\\.cvs\\objects\\93\\bc5fa433afe94a7b10dd955df6e80c91b25961') as f:
+            self.assertEqual(f.readline(),
+            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(93bc5fa433afe94a7b10dd955df6e80c91b25961”sb.')
+        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
+        with open(f'{directory}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f') as f:
+            self.assertEqual(f.readline(),
+            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(109f4b3c50d7b0df729d299bc6f8e9ef9066971f”sb.')
+        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
+        with open(f'{directory}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf') as f:
+            self.assertEqual(f.readline(),
+            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(02082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf”sb.')
+        shutil.rmtree(f'{directory}\\.cvs')
+        os.remove(f'{directory}\\a.txt')
+        os.remove(f'{directory}\\b.txt')
+
+
 
 if __name__ == "__main__":
     unittest.main()

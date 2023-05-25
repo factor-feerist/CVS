@@ -17,7 +17,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests in test.py">
+  <component name="RunManager" selected="Python tests.Python tests for test.Test_CVS.test_init">
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="CVS" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,9 +97,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests for test.Test_CVS.test_init" />
         <item itemvalue="Python tests.Python tests in test.py" />
         <item itemvalue="Python tests.Python tests for test.Test_CVS.test_commit" />
-        <item itemvalue="Python tests.Python tests for test.Test_CVS.test_init" />
         <item itemvalue="Python tests.Python tests for test.Test_CVS.test_add" />
         <item itemvalue="Python.test" />
       </list>
