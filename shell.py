@@ -125,7 +125,7 @@ class CVSShell(cmd.Cmd):
                 print(f'*** Created branch {name}')
             except Exception as e:
                 print(e)
-        
+
     def precmd(self, line):
         print()
         return line

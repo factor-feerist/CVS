@@ -1,9 +1,9 @@
 import sys
 import unittest
 import os
-from shell import CVSShell
 import stat
 sys.path.append('../')
+from shell import CVSShell
 
 
 def rmtree(top):
@@ -108,21 +108,32 @@ class TestCVS(unittest.TestCase):
             f.write('test2')
         self.shell.do_add('.')
         self.shell.do_commit('test')
-        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
-        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\83\\8572438ff69f29a18f35a10327460d2fde7fea'))
-        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
-        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\b4\\44ac06613fc8d'
+                                       f'63795be9ad0beaf55011936ac'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\83\\8572438ff69f2'
+                                       f'9a18f35a10327460d2fde7fea'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\10\\9f4b3c50d7b0d'
+                                       f'f729d299bc6f8e9ef9066971f'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\02\\082a7f163d181'
+                                       f'e9fcbe8ac11b9e6ad2aa4d6cf'))
         with open(f'{self.repository}\\.cvs\\commitlog', 'r') as f:
             result_fl = f.readline().split('\\\\')
             self.assertEqual(result_fl[0], 'Commit')
-            self.assertEqual(result_fl[1], '838572438ff69f29a18f35a10327460d2fde7fea')
+            self.assertEqual(result_fl[1], '838572438ff69f29a18f'
+                                           '35a10327460d2fde7fea')
             self.assertEqual(result_fl[3], 'test\n')
             result_sl = f.readline().split(' ')
             self.assertEqual(result_sl[4], 'added')
-            self.assertEqual(result_sl[5], 'b444ac06613fc8d63795be9ad0beaf55011936ac\n')
+            self.assertEqual(result_sl[5], 'b444ac06613fc8d63795'
+                                           'be9ad0beaf55011936ac\n')
             result_tl = f.readline().split(' ')
             self.assertEqual(result_tl[4], 'added')
-            self.assertEqual(result_tl[5], '109f4b3c50d7b0df729d299bc6f8e9ef9066971f\n')
+            self.assertEqual(result_tl[5], '109f4b3c50d7b0df729d'
+                                           '299bc6f8e9ef9066971f\n')
         self.shell.do_cd(self.directory)
         rmtree(self.repository)
 
@@ -140,9 +151,11 @@ class TestCVS(unittest.TestCase):
         self.shell.do_branch('vetka')
         with open(f'{self.repository}\\.cvs\\refs\\heads\\vetka', 'r') as f:
             result = f.readline()
-            self.assertEqual(result, '838572438ff69f29a18f35a10327460d2fde7fea')
+            self.assertEqual(result,
+                             '838572438ff69f29a18f35a10327460d2fde7fea')
         self.shell.do_branch('vetka r')
-        result_delete = os.path.exists(f'{self.repository}\\.cvs\\refs\\heads\\vetka')
+        result_delete = os.path.exists(f'{self.repository}'
+                                       f'\\.cvs\\refs\\heads\\vetka')
         self.assertFalse(result_delete)
         self.shell.do_cd(self.directory)
         rmtree(self.repository)
