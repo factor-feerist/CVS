@@ -3,65 +3,80 @@ import unittest
 import os
 import shutil
 import re
-sys.path.append('../')
 from shell import CVSShell
+import stat
+sys.path.append('../')
+
+
 
 shell = CVSShell()
 
+def rmtree(top):
+    for root, dirs, files in os.walk(top, topdown=False):
+        for name in files:
+            filename = os.path.join(root, name)
+            os.chmod(filename, stat.S_IWUSR)
+            os.remove(filename)
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+
 
 class TestCVS(unittest.TestCase):
-    def SetUp(self):
+    def setUp(self):
         pass
 
     def test_init(self):
         directory = os.getcwd()
+        shell.do_mkdir('test')
+        shell.do_cd('test')
         shell.do_init('')
-        directory = os.path.join(directory, '.cvs')
-        self.assertTrue(os.path.isdir(directory))
-        self.assertTrue(os.path.isdir(f'{directory}\\objects'))
-        self.assertTrue(os.path.isdir(f'{directory}\\refs'))
-        self.assertTrue(os.path.isfile(f'{directory}\\commitlog'))
-        self.assertTrue(os.path.isfile(f'{directory}\\HEAD'))
-        self.assertTrue(os.path.isfile(f'{directory}\\index'))
-        self.assertTrue(os.path.isfile(f'{directory}\\stagelog'))
-        self.assertTrue(os.path.isdir(f'{directory}\\refs\\heads'))
-        shutil.rmtree(directory)
+        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs'))
+        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\objects'))
+        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\refs'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\commitlog'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\HEAD'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\index'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\stagelog'))
+        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\refs\\heads'))
+        #os.system('rmdir /S /Q "{}"'.format(f'{directory}\\test'))
+        #os.remove(f'{directory}\\test')
+        rmtree(f'{directory}\\test')
         shell.do_cd(directory)
 
     def test_add(self):
-        directory = os.path.join(os.getcwd(), 'test')
+        directory = os.getcwd()
+        shell.do_mkdir('test')
         shell.do_cd('test')
         shell.do_init('')
         shell.do_touch('a.txt')
         shell.do_touch("b.txt")
-        with open(f'{directory}\\a.txt', 'w') as f:
+        with open(f'{directory}\\test\\a.txt', 'w') as f:
             f.write('1')
-        with open(f'{directory}\\b.txt', 'w') as f:
+        with open(f'{directory}\\test\\b.txt', 'w') as f:
             f.write('2')
         shell.do_mkdir("dir")
-        shell.do_cd(os.path.join(directory, 'dir'))
+        shell.do_cd(f'{directory}\\test\\dir')
         shell.do_touch('adir.txt')
         shell.do_touch('bdir.txt')
-        with open(f'{directory}\\dir\\adir.txt', 'w') as f:
+        with open(f'{directory}\\test\\dir\\adir.txt', 'w') as f:
             f.write("1dir")
-        with open(f'{directory}\\dir\\bdir.txt', 'w') as f:
+        with open(f'{directory}\\test\\dir\\bdir.txt', 'w') as f:
             f.write("2dir")
-        shell.do_cd(directory)
+        shell.do_cd(f'{directory}\\test')
         shell.do_add('dir')
-        with open(os.path.join(os.path.join(directory, 'dir'),
-                               'adir.txt'), 'w') as f:
+        with open(f'{directory}\\test\\dir\\adir.txt', 'w') as f:
             f.write('test1')
         shell.do_add('dir a.txt')
-        with open(os.path.join(directory, 'a.txt'), 'w') as f:
+        with open(f'{directory}\\test\\a.txt', 'w') as f:
             f.write('test2')
         shell.do_add('.')
         result_index = []
-        with open(f'{directory}\\.cvs\\index', 'r') as f:
+        with open(f'{directory}\\test\\.cvs\\index', 'r') as f:
             _index = f.read().split('\n')[:-1]
             for line in _index:
                 result_index.append(line.split('\\\\')[-1])
         result_log = []
-        with open(f'{directory}\\.cvs\\stagelog', 'r') as f:
+        with open(f'{directory}\\test\\.cvs\\stagelog', 'r') as f:
             for line in f.read().split('\n')[:-1]:
                 result_log.append(str(line.split('\\\\')[-1]))
         unittest.TestCase.assertEqual(self, result_index,
@@ -86,42 +101,39 @@ class TestCVS(unittest.TestCase):
                                        '299bc6f8e9ef9066971f',
                                        'da4b9237bacccdf19c07'
                                        '60cab7aec4a8359010b0'])
-        shutil.rmtree(f'{directory}\\.cvs')
-        shutil.rmtree(f'{directory}\\dir')
-        os.remove(f'{directory}\\a.txt')
-        os.remove(f'{directory}\\b.txt')
+        shell.do_cd(directory)
+        rmtree(f'{directory}\\test')
 
     def test_commit(self):
-        directory = os.path.join(os.getcwd(), 'test')
+        directory = os.getcwd()
         shell.do_cd('test')
         shell.do_init('')
-        shell.do_touch(f'{directory}\\a.txt')
-        shell.do_touch(f'{directory}\\b.txt')
-        with open(f'{directory}\\a.txt', 'w') as f:
+        shell.do_touch(f'{directory}\\test\\a.txt')
+        shell.do_touch(f'{directory}\\test\\b.txt')
+        with open(f'{directory}\\test\\a.txt', 'w') as f:
             f.write('test1')
-        with open(f'{directory}\\b.txt', 'w') as f:
+        with open(f'{directory}\\test\\b.txt', 'w') as f:
             f.write('test2')
         shell.do_add('.')
-        shell.do_commit('sdv')
-        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
-        with open(f'{directory}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac') as f:
-            self.assertEqual(f.readline(),
-            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(b444ac06613fc8d63795be9ad0beaf55011936ac”sb.')
-        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\93\\bc5fa433afe94a7b10dd955df6e80c91b25961'))
-        with open(f'{directory}\\.cvs\\objects\\93\\bc5fa433afe94a7b10dd955df6e80c91b25961') as f:
-            self.assertEqual(f.readline(),
-            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(93bc5fa433afe94a7b10dd955df6e80c91b25961”sb.')
-        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
-        with open(f'{directory}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f') as f:
-            self.assertEqual(f.readline(),
-            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(109f4b3c50d7b0df729d299bc6f8e9ef9066971f”sb.')
-        self.assertTrue(os.path.isfile(f'{directory}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
-        with open(f'{directory}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf') as f:
-            self.assertEqual(f.readline(),
-            'Ђ•U       Њmodules.objects”ЊBlob”“”)Ѓ”}”Њhash”Њ(02082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf”sb.')
-        shutil.rmtree(f'{directory}\\.cvs')
-        os.remove(f'{directory}\\a.txt')
-        os.remove(f'{directory}\\b.txt')
+        shell.do_commit('test')
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\83\\8572438ff69f29a18f35a10327460d2fde7fea'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
+        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
+        with open(f'{directory}\\test\\.cvs\\commitlog', 'r') as f:
+            result_fl = f.readline().split('\\\\')
+            self.assertEqual(result_fl[0], 'Commit')
+            self.assertEqual(result_fl[1], '838572438ff69f29a18f35a10327460d2fde7fea')
+            self.assertEqual(result_fl[3], 'test\n')
+            result_sl = f.readline().split(' ')
+            self.assertEqual(result_sl[4], 'added')
+            self.assertEqual(result_sl[5], 'b444ac06613fc8d63795be9ad0beaf55011936ac\n')
+            result_tl = f.readline().split(' ')
+            self.assertEqual(result_tl[4], 'added')
+            self.assertEqual(result_tl[5], '109f4b3c50d7b0df729d299bc6f8e9ef9066971f\n')
+        shell.do_cd(directory)
+        rmtree(f"{directory}\\test")
+
 
 
 
