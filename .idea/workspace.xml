@@ -32,6 +32,20 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests for test.TestCVS.test_branch" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="CVS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/modules" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test.TestCVS.test_branch&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="Python tests for test.TestCVS.test_commit" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="CVS" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -60,20 +74,6 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for test.Test_CVS.test_init" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="CVS" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/modules" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test.Test_CVS.test_init&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="Python tests in test.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="CVS" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -91,10 +91,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.Python tests in test.py" />
+        <item itemvalue="Python tests.Python tests for test.TestCVS.test_branch" />
         <item itemvalue="Python tests.Python tests for test.TestCVS.test_commit" />
         <item itemvalue="Python tests.Python tests for test.TestCVS.test_add" />
         <item itemvalue="Python tests.Python tests for test.TestCVS.test_init" />
-        <item itemvalue="Python tests.Python tests for test.Test_CVS.test_init" />
       </list>
     </recent_temporary>
   </component>

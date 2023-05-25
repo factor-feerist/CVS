@@ -1,15 +1,10 @@
 import sys
 import unittest
 import os
-import shutil
-import re
 from shell import CVSShell
 import stat
 sys.path.append('../')
 
-
-
-shell = CVSShell()
 
 def rmtree(top):
     for root, dirs, files in os.walk(top, topdown=False):
@@ -23,60 +18,58 @@ def rmtree(top):
 
 class TestCVS(unittest.TestCase):
     def setUp(self):
-        pass
+        self.directory = os.getcwd()
+        self.shell = CVSShell()
+        self.repository = os.path.join(self.directory, 'test')
 
     def test_init(self):
-        directory = os.getcwd()
-        shell.do_mkdir('test')
-        shell.do_cd('test')
-        shell.do_init('')
-        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs'))
-        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\objects'))
-        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\refs'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\commitlog'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\HEAD'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\index'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\stagelog'))
-        self.assertTrue(os.path.isdir(f'{directory}\\test\\.cvs\\refs\\heads'))
-        #os.system('rmdir /S /Q "{}"'.format(f'{directory}\\test'))
-        #os.remove(f'{directory}\\test')
-        rmtree(f'{directory}\\test')
-        shell.do_cd(directory)
+        self.shell.do_mkdir('test')
+        self.shell.do_cd('test')
+        self.shell.do_init('')
+        self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs'))
+        self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs\\objects'))
+        self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs\\refs'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\commitlog'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\HEAD'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\index'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\stagelog'))
+        self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs\\refs\\heads'))
+        rmtree(self.repository)
+        self.shell.do_cd(self.directory)
 
     def test_add(self):
-        directory = os.getcwd()
-        shell.do_mkdir('test')
-        shell.do_cd('test')
-        shell.do_init('')
-        shell.do_touch('a.txt')
-        shell.do_touch("b.txt")
-        with open(f'{directory}\\test\\a.txt', 'w') as f:
+        self.shell.do_mkdir('test')
+        self.shell.do_cd('test')
+        self.shell.do_init('')
+        self.shell.do_touch('a.txt')
+        self.shell.do_touch("b.txt")
+        with open(f'{self.repository}\\a.txt', 'w') as f:
             f.write('1')
-        with open(f'{directory}\\test\\b.txt', 'w') as f:
+        with open(f'{self.repository}\\b.txt', 'w') as f:
             f.write('2')
-        shell.do_mkdir("dir")
-        shell.do_cd(f'{directory}\\test\\dir')
-        shell.do_touch('adir.txt')
-        shell.do_touch('bdir.txt')
-        with open(f'{directory}\\test\\dir\\adir.txt', 'w') as f:
+        self.shell.do_mkdir("dir")
+        self.shell.do_cd(f'{self.repository}\\dir')
+        self.shell.do_touch('adir.txt')
+        self.shell.do_touch('bdir.txt')
+        with open(f'{self.repository}\\dir\\adir.txt', 'w') as f:
             f.write("1dir")
-        with open(f'{directory}\\test\\dir\\bdir.txt', 'w') as f:
+        with open(f'{self.repository}\\dir\\bdir.txt', 'w') as f:
             f.write("2dir")
-        shell.do_cd(f'{directory}\\test')
-        shell.do_add('dir')
-        with open(f'{directory}\\test\\dir\\adir.txt', 'w') as f:
+        self.shell.do_cd(self.repository)
+        self.shell.do_add('dir')
+        with open(f'{self.repository}\\dir\\adir.txt', 'w') as f:
             f.write('test1')
-        shell.do_add('dir a.txt')
-        with open(f'{directory}\\test\\a.txt', 'w') as f:
+        self.shell.do_add('dir a.txt')
+        with open(f'{self.repository}\\a.txt', 'w') as f:
             f.write('test2')
-        shell.do_add('.')
+        self.shell.do_add('.')
         result_index = []
-        with open(f'{directory}\\test\\.cvs\\index', 'r') as f:
+        with open(f'{self.repository}\\.cvs\\index', 'r') as f:
             _index = f.read().split('\n')[:-1]
             for line in _index:
                 result_index.append(line.split('\\\\')[-1])
         result_log = []
-        with open(f'{directory}\\test\\.cvs\\stagelog', 'r') as f:
+        with open(f'{self.repository}\\.cvs\\stagelog', 'r') as f:
             for line in f.read().split('\n')[:-1]:
                 result_log.append(str(line.split('\\\\')[-1]))
         unittest.TestCase.assertEqual(self, result_index,
@@ -101,26 +94,25 @@ class TestCVS(unittest.TestCase):
                                        '299bc6f8e9ef9066971f',
                                        'da4b9237bacccdf19c07'
                                        '60cab7aec4a8359010b0'])
-        shell.do_cd(directory)
-        rmtree(f'{directory}\\test')
+        self.shell.do_cd(self.directory)
+        rmtree(self.repository)
 
     def test_commit(self):
-        directory = os.getcwd()
-        shell.do_cd('test')
-        shell.do_init('')
-        shell.do_touch(f'{directory}\\test\\a.txt')
-        shell.do_touch(f'{directory}\\test\\b.txt')
-        with open(f'{directory}\\test\\a.txt', 'w') as f:
+        self.shell.do_cd('test')
+        self.shell.do_init('')
+        self.shell.do_touch(f'{self.repository}\\a.txt')
+        self.shell.do_touch(f'{self.repository}\\b.txt')
+        with open(f'{self.repository}\\a.txt', 'w') as f:
             f.write('test1')
-        with open(f'{directory}\\test\\b.txt', 'w') as f:
+        with open(f'{self.repository}\\b.txt', 'w') as f:
             f.write('test2')
-        shell.do_add('.')
-        shell.do_commit('test')
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\83\\8572438ff69f29a18f35a10327460d2fde7fea'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
-        self.assertTrue(os.path.isfile(f'{directory}\\test\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
-        with open(f'{directory}\\test\\.cvs\\commitlog', 'r') as f:
+        self.shell.do_add('.')
+        self.shell.do_commit('test')
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\b4\\44ac06613fc8d63795be9ad0beaf55011936ac'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\83\\8572438ff69f29a18f35a10327460d2fde7fea'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\10\\9f4b3c50d7b0df729d299bc6f8e9ef9066971f'))
+        self.assertTrue(os.path.isfile(f'{self.repository}\\.cvs\\objects\\02\\082a7f163d181e9fcbe8ac11b9e6ad2aa4d6cf'))
+        with open(f'{self.repository}\\.cvs\\commitlog', 'r') as f:
             result_fl = f.readline().split('\\\\')
             self.assertEqual(result_fl[0], 'Commit')
             self.assertEqual(result_fl[1], '838572438ff69f29a18f35a10327460d2fde7fea')
@@ -131,15 +123,30 @@ class TestCVS(unittest.TestCase):
             result_tl = f.readline().split(' ')
             self.assertEqual(result_tl[4], 'added')
             self.assertEqual(result_tl[5], '109f4b3c50d7b0df729d299bc6f8e9ef9066971f\n')
-        shell.do_cd(directory)
-        rmtree(f"{directory}\\test")
+        self.shell.do_cd(self.directory)
+        rmtree(self.repository)
 
-
+    def test_branch(self):
+        self.shell.do_cd('test')
+        self.shell.do_init('')
+        self.shell.do_touch(f'{self.repository}\\a.txt')
+        self.shell.do_touch(f'{self.repository}\\b.txt')
+        with open(f'{self.repository}\\a.txt', 'w') as f:
+            f.write('test1')
+        with open(f'{self.repository}\\b.txt', 'w') as f:
+            f.write('test2')
+        self.shell.do_add('.')
+        self.shell.do_commit('test')
+        self.shell.do_branch('vetka')
+        with open(f'{self.repository}\\.cvs\\refs\\heads\\vetka', 'r') as f:
+            result = f.readline()
+            self.assertEqual(result, '838572438ff69f29a18f35a10327460d2fde7fea')
+        self.shell.do_branch('vetka r')
+        result_delete = os.path.exists(f'{self.repository}\\.cvs\\refs\\heads\\vetka')
+        self.assertFalse(result_delete)
+        self.shell.do_cd(self.directory)
+        rmtree(self.repository)
 
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
