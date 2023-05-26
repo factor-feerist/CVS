@@ -1,4 +1,7 @@
 import os
+import pickle
+import queue
+import stat
 from datetime import datetime
 from modules.utilities import read_index
 from modules.objects import Blob, Tree
@@ -172,3 +175,67 @@ class CVS:
     def tag_log(self):
         with open(f'{self.directory}\\.cvs\\taglog') as f:
             return f.read()
+
+    def checkout(self, to):
+        h = ''
+        if os.path.exists(f'{self.directory}\\.cvs\\refs\\heads\\{to}'):
+            with open(f'{self.directory}\\.cvs\\refs\\heads\\{to}') as f:
+                h = f.read()
+            self.branch_handler.set_head_to_branch(to)
+        elif os.path.exists(f'{self.directory}\\.cvs\\refs\\tags\\{to}'):
+            with open(f'{self.directory}\\.cvs\\refs\\tags\\{to}') as f:
+                h = f.read().split('\\\\')[0]
+            self.branch_handler.set_head_to_commit(h)
+        elif len(to) >= 3:
+            if os.path.exists(f'{self.directory}\\.cvs\\objects\\'
+                              f'{to[0:2]}\\{to[2::]}'):
+                h = to
+                self.branch_handler.set_head_to_commit(h)
+            else:
+                raise Exception(f'No commit {to}')
+
+        for item in os.listdir('.'):
+            path = f'{self.directory}\\{item}'
+            if os.path.isdir(path) and item != '.cvs':
+                for root, dirs, files in os.walk(path, topdown=False):
+                    for name in files:
+                        filename = os.path.join(root, name)
+                        os.chmod(filename, stat.S_IWUSR)
+                        os.remove(filename)
+                    for name in dirs:
+                        os.rmdir(os.path.join(root, name))
+                os.rmdir(path)
+            elif os.path.isfile(path):
+                os.remove(path)
+
+        with open(f'{self.directory}\\.cvs\\objects\\'
+                  f'{h[0:2]}\\{h[2::]}', 'rb') as f:
+            commit = pickle.load(f).split('\n')[0].split()[1]
+        q = queue.Queue()
+        actual_files = {}
+        with open(f'{self.directory}\\.cvs\\objects\\'
+                  f'{commit[0:2]}\\{commit[2::]}', 'rb') as f:
+            content = pickle.load(f)
+        for line in content.split('\n'):
+            ops = line.split()
+            if len(ops) == 3:
+                q.put([ops[0], ops[1], f'{ops[2]}'])
+        while not q.empty():
+            blob_type, h, name = q.get()
+            with open(f'{self.directory}\\.cvs\\objects\\{h[0:2]}\\{h[2::]}',
+                      'rb') as f:
+                content = pickle.load(f)
+            if blob_type == 'tree':
+                os.mkdir(f'{self.directory}\\{name}')
+                for line in content.split('\n'):
+                    ops = line.split()
+                    if len(ops) == 3:
+                        q.put([ops[0], ops[1], f'{name}\\{ops[2]}'])
+            elif blob_type == 'blob':
+                with open(f'{self.directory}\\{name}', 'w')as f:
+                    f.write(content)
+                    actual_files[f'{self.directory}\\{name}'] = h
+
+        with open(f'{self.directory}\\.cvs\\index', 'w') as f:
+            for key, value in actual_files.items():
+                f.write(f'{key}\\\\{value}\n')

@@ -148,12 +148,25 @@ class CVSShell(cmd.Cmd):
                 print(f'*** Created tag {name} with message: {message}')
             except Exception as e:
                 print(e)
+        else:
+            print('Incorrect format')
 
     def do_tlog(self, arg):
         'Prints tag log\n> tlog'
         if not self.is_repository():
             return
         print(self.cvs.tag_log())
+
+    def do_checkout(self, arg):
+        'Switch version of repository by commit/branch/tag' \
+            '\n> checkout commit/branch/tag'
+        if not self.is_repository():
+            return
+        try:
+            self.cvs.checkout(arg)
+            print('Repository version changed successfully')
+        except Exception as e:
+            print(e)
 
     def precmd(self, line):
         print()
