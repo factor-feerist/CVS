@@ -10,10 +10,7 @@ class Blob:
         if not os.path.exists(blob_path):
             os.mkdir(blob_path)
         with open(f'{blob_path}\\{self.hash[2:]}', 'wb') as f:
-            f.write(self.serialize())
-
-    def serialize(self):
-        return pickle.dumps(self)
+            pickle.dump(content, f)
 
 
 class Tree:
