@@ -126,6 +126,35 @@ class CVSShell(cmd.Cmd):
             except Exception as e:
                 print(e)
 
+    def do_tag(self, arg):
+        'Creates tag with mentioned name and message:' \
+            '\n> tag name message' \
+            '\nRemoves tag with mentioned name:' \
+            '\n> tag name r'
+        if not self.is_repository():
+            return
+        ops = arg.split()
+        name = ops[0]
+        if len(ops) == 2 and ops[1] == 'r':
+            try:
+                self.cvs.remove_tag(name)
+                print(f'*** Removed tag {name}')
+            except Exception as e:
+                print(e)
+        elif len(ops) >= 2:
+            try:
+                message = ' '.join(ops[1::])
+                self.cvs.create_tag(name, message)
+                print(f'*** Created tag {name} with message: {message}')
+            except Exception as e:
+                print(e)
+
+    def do_tlog(self, arg):
+        'Prints tag log\n> tlog'
+        if not self.is_repository():
+            return
+        print(self.cvs.tag_log())
+
     def precmd(self, line):
         print()
         return line

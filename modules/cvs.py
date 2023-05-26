@@ -15,6 +15,7 @@ class CVS:
         os.mkdir(f'{self.directory}\\.cvs\\objects')
         os.mkdir(f'{self.directory}\\.cvs\\refs')
         os.mkdir(f'{self.directory}\\.cvs\\refs\\heads')
+        os.mkdir(f'{self.directory}\\.cvs\\refs\\tags')
         with open(f'{self.directory}\\.cvs\\HEAD', 'w') as f:
             f.write('ref:refs/heads/master')
         with open(f'{self.directory}\\.cvs\\index', 'w'):
@@ -22,6 +23,8 @@ class CVS:
         with open(f'{self.directory}\\.cvs\\stagelog', 'w'):
             pass
         with open(f'{self.directory}\\.cvs\\commitlog', 'w'):
+            pass
+        with open(f'{self.directory}\\.cvs\\taglog', 'w'):
             pass
 
     @staticmethod
@@ -104,7 +107,8 @@ class CVS:
                     f.write(f'{key}\\\\{value}\n')
         if branch is None:
             self.branch_handler.set_head_to_commit(h)
-        self.branch_handler.set_commit_by_branch(branch, h)
+        else:
+            self.branch_handler.set_commit_by_branch(branch, h)
         return h
 
     def commit_log(self):
@@ -112,7 +116,9 @@ class CVS:
             return f.read()
 
     def create_branch(self, name):
-        path = f'.cvs\\refs\\heads\\{name}'
+        path = f'{self.directory}\\.cvs\\refs\\heads\\{name}'
+        if os.path.exists(path):
+            raise Exception(f'Branch {name} already exists')
         branch = self.branch_handler.get_head_branch()
         if branch is None:
             commit = self.branch_handler.get_head_commit()
@@ -132,3 +138,37 @@ class CVS:
             os.remove(path)
         else:
             raise Exception(f'No branch named {name}')
+
+    def create_tag(self, name, message):
+        path = f'{self.directory}\\.cvs\\refs\\tags\\{name}'
+        if os.path.exists(path):
+            raise Exception(f'Tag {name} already exists')
+        branch = self.branch_handler.get_head_branch()
+        if branch is None:
+            commit = self.branch_handler.get_head_commit()
+        else:
+            commit = self.branch_handler.get_commit_by_branch(branch)
+        if commit is None:
+            raise Exception('No commits in repository')
+        with open(path, 'w') as f:
+            f.write(f'{commit}\\\\{message}')
+        with open(f'{self.directory}\\.cvs\\taglog', 'a') as f:
+            f.write(f'{name}\\\\{commit}\\\\{message}\n')
+
+    def remove_tag(self, name):
+        path = f'{self.directory}\\.cvs\\refs\\tags\\{name}'
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            raise Exception(f'No tag named {name}')
+        tag_log = ''
+        with open(f'{self.directory}\\.cvs\\taglog') as f:
+            for line in f:
+                if line.split('\\\\')[0] != name:
+                    tag_log += line
+        with open(f'{self.directory}\\.cvs\\taglog', 'w') as f:
+            f.write(tag_log)
+
+    def tag_log(self):
+        with open(f'{self.directory}\\.cvs\\taglog') as f:
+            return f.read()
