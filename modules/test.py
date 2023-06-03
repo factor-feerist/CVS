@@ -21,10 +21,13 @@ class TestCVS(unittest.TestCase):
         self.directory = os.getcwd()
         self.shell = CVSShell()
         self.repository = os.path.join(self.directory, 'test')
+        self.shell.do_mkdir('test')
+        self.shell.do_cd(self.repository)
+
+    def tearDown(self):
+        os.rmdir(self.repository)
 
     def test_init(self):
-        self.shell.do_mkdir('test')
-        self.shell.do_cd('test')
         self.shell.do_init('')
         self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs'))
         self.assertTrue(os.path.isdir(f'{self.repository}\\.cvs\\objects'))
@@ -38,8 +41,6 @@ class TestCVS(unittest.TestCase):
         self.shell.do_cd(self.directory)
 
     def test_add(self):
-        self.shell.do_mkdir('test')
-        self.shell.do_cd('test')
         self.shell.do_init('')
         self.shell.do_touch('a.txt')
         self.shell.do_touch("b.txt")
@@ -98,7 +99,6 @@ class TestCVS(unittest.TestCase):
         rmtree(self.repository)
 
     def test_commit(self):
-        self.shell.do_cd('test')
         self.shell.do_init('')
         self.shell.do_touch(f'{self.repository}\\a.txt')
         self.shell.do_touch(f'{self.repository}\\b.txt')
@@ -138,7 +138,6 @@ class TestCVS(unittest.TestCase):
         rmtree(self.repository)
 
     def test_branch(self):
-        self.shell.do_cd('test')
         self.shell.do_init('')
         self.shell.do_touch(f'{self.repository}\\a.txt')
         self.shell.do_touch(f'{self.repository}\\b.txt')
@@ -157,6 +156,74 @@ class TestCVS(unittest.TestCase):
         result_delete = os.path.exists(f'{self.repository}'
                                        f'\\.cvs\\refs\\heads\\vetka')
         self.assertFalse(result_delete)
+        self.shell.do_cd(self.directory)
+        rmtree(self.repository)
+
+    def test_tag(self):
+        self.shell.do_init('')
+        self.shell.do_touch(f'{self.repository}\\a.txt')
+        self.shell.do_touch(f'{self.repository}\\b.txt')
+        with open(f'{self.repository}\\a.txt', 'w') as f:
+            f.write('test1')
+        with open(f'{self.repository}\\b.txt', 'w') as f:
+            f.write('test2')
+        self.shell.do_add('.')
+        self.shell.do_commit('test')
+        self.shell.do_tag('bam message')
+        with open(f'{self.repository}\\.cvs\\refs\\tags\\bam', 'r') as f:
+            result = f.readline()
+            self.assertEqual(result,
+                             '838572438ff69f29a18f35a10327460d2fde7fea\\'
+                             '\\message')
+        with open(f'{self.repository}\\.cvs\\taglog') as f:
+            result = f.readline()
+            self.assertEqual(result,
+                             'bam\\\\838572438ff69f29a18f'
+                             '35a10327460d2fde7fea\\\\message\n')
+        self.shell.do_tag('bam r')
+        result_delete = os.path.exists(f'{self.repository}'
+                                       f'\\.cvs\\refs\\tags\\bam')
+        self.assertFalse(result_delete)
+        with open(f'{self.repository}\\.cvs\\taglog') as f:
+            result = f.readline()
+            self.assertEqual(result, '')
+        self.shell.do_cd(self.directory)
+        rmtree(self.repository)
+
+    def test_checkout(self):
+        self.shell.do_init('')
+        self.shell.do_touch(f'{self.repository}\\a.txt')
+        self.shell.do_touch(f'{self.repository}\\b.txt')
+        with open(f'{self.repository}\\a.txt', 'w') as f:
+            f.write('test1')
+        with open(f'{self.repository}\\b.txt', 'w') as f:
+            f.write('test2')
+        self.shell.do_add('.')
+        self.shell.do_commit('test')
+        self.shell.do_tag('bam message')
+        self.shell.do_mkdir('c')
+        self.shell.do_cd('c')
+        self.shell.do_touch('d.txt')
+        with open(f'{self.repository}\\c\\d.txt', 'w') as f:
+            f.write('test3')
+        self.shell.do_cd(self.repository)
+        self.shell.do_add('.')
+        self.shell.do_commit('test2')
+        self.shell.do_checkout('bam')
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\b4\\44ac06613fc8d'
+                                       f'63795be9ad0beaf55011936ac'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\83\\8572438ff69f2'
+                                       f'9a18f35a10327460d2fde7fea'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\10\\9f4b3c50d7b0d'
+                                       f'f729d299bc6f8e9ef9066971f'))
+        self.assertTrue(os.path.isfile(f'{self.repository}'
+                                       f'\\.cvs\\objects\\02\\082a7f163d181'
+                                       f'e9fcbe8ac11b9e6ad2aa4d6cf'))
+        self.assertFalse(os.path.isfile(f'{self.repository}'
+                                        f'\\.cvs\\c\\d.txt'))
         self.shell.do_cd(self.directory)
         rmtree(self.repository)
 
